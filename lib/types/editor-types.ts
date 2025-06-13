@@ -50,6 +50,7 @@ export type ElementStyle = {
   borderColor?: string;
   opacity?: number;
   zIndex?: number;
+  boxShadow?: string;
   // Flex properties
   flexDirection?: 'row' | 'column';
   justifyContent?: 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around';
@@ -140,6 +141,9 @@ export interface LogicEdge {
   target: string;
   label?: string;
   type?: string;
+  sourceHandle?: string;
+  targetHandle?: string;
+  data?: Record<string, unknown>;
 }
 
 // Code Mode types

@@ -14,105 +14,322 @@ interface CanvasProps {
   onResizeElement: (id: string, width: number, height: number) => void;
 }
 
-// Define default properties for each element type
-const getDefaultPropsForType = (type: ElementType): Record<string, unknown> => {
-  switch (type) {
-    case 'text':
-      return { text: 'Text content' };
-    case 'button':
-      return { text: 'Button', backgroundColor: '#3b82f6', color: '#ffffff' };
-    case 'input':
-      return { placeholder: 'Enter text...', type: 'text' };
-    case 'image':
-      // Use SVG data URL instead of external URL to avoid fetch errors
-      return { 
-        src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" viewBox="0 0 200 150"><rect width="200" height="150" fill="%23f1f5f9"/><text x="50%" y="50%" font-family="Arial" font-size="14" fill="%2364748b" text-anchor="middle" dominant-baseline="middle">Image Placeholder</text></svg>', 
-        alt: 'Image' 
-      };
-    case 'video':
-      return { src: '', controls: true };
-    case 'svg':
-      return { src: '', alt: 'SVG Icon' };
-    default:
-      return {};
-  }
-};
-
-// Define default styles for each element type
-const getDefaultStyleForType = (type: ElementType): Record<string, unknown> => {
-  switch (type) {
-    case 'text':
-      return { 
-        fontFamily: 'Inter', 
-        fontSize: 16, 
-        fontWeight: 'normal', 
-        textAlign: 'left',
-        color: '#000000'
-      };
-    case 'button':
-      return { 
-        borderRadius: 4, 
-        padding: 8
-      };
-    case 'container':
-      return { 
-        padding: 16,
-        backgroundColor: '#ffffff',
-        borderRadius: 4,
-        borderWidth: 1,
-        borderStyle: 'solid',
-        borderColor: '#e2e8f0'
-      };
-    case 'vstack':
-      return {
-        flexDirection: 'column',
-        gap: 8,
-        padding: 8
-      };
-    case 'hstack':
-      return {
-        flexDirection: 'row',
-        gap: 8,
-        padding: 8
-      };
-    case 'zstack':
-      return {
-        position: 'relative'
-      };
-    default:
-      return {};
-  }
-};
-
-// Get default dimensions for each element type
+// Helper function to get default dimensions for element types
 const getDefaultDimensionsForType = (type: ElementType): { width: number; height: number } => {
   switch (type) {
-    case 'container':
+    case "button":
+      return { width: 120, height: 40 };
+    case "text":
+      return { width: 200, height: 24 };
+    case "input":
+      return { width: 200, height: 40 };
+    case "image":
+      return { width: 200, height: 200 };
+    case "container":
       return { width: 300, height: 200 };
-    case 'text':
-      return { width: 200, height: 40 };
-    case 'button':
-      return { width: 150, height: 40 };
-    case 'input':
-      return { width: 200, height: 40 };
-    case 'image':
-    case 'svg':
-      return { width: 200, height: 150 };
-    case 'video':
+    case "card":
       return { width: 320, height: 240 };
-    case 'vstack':
-    case 'hstack':
-    case 'zstack':
+    case "vstack":
+    case "hstack":
+    case "zstack":
       return { width: 250, height: 250 };
-    case 'grid':
-      return { width: 300, height: 300 };
-    case 'card':
-      return { width: 250, height: 300 };
-    case 'columns':
+    case "grid":
+      return { width: 400, height: 300 };
+    case "columns":
       return { width: 400, height: 200 };
     default:
-      return { width: 150, height: 150 };
+      return { width: 200, height: 100 };
   }
+};
+
+// Helper function to get default style for element types
+const getDefaultStyleForType = (type: ElementType): Record<string, unknown> => {
+  switch (type) {
+    case "button":
+      return {
+        backgroundColor: "#3b82f6",
+        color: "#ffffff",
+        borderRadius: 4,
+        padding: 8,
+        textAlign: "center",
+        fontWeight: "medium",
+      };
+    case "text":
+      return {
+        color: "#000000",
+        fontSize: 16,
+        fontWeight: "normal",
+      };
+    case "input":
+      return {
+        borderWidth: 1,
+        borderColor: "#d1d5db",
+        borderRadius: 4,
+        padding: 8,
+      };
+    case "container":
+      return {
+        backgroundColor: "#f3f4f6",
+        borderRadius: 8,
+        padding: 16,
+      };
+    case "card":
+      return {
+        backgroundColor: "#ffffff",
+        borderRadius: 8,
+        padding: 16,
+        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+      };
+    case "vstack":
+      return {
+        backgroundColor: "#f9fafb",
+        padding: 12,
+        gap: 8,
+        flexDirection: "column",
+      };
+    case "hstack":
+      return {
+        backgroundColor: "#f9fafb",
+        padding: 12,
+        gap: 8,
+        flexDirection: "row",
+      };
+    case "grid":
+      return {
+        backgroundColor: "#f9fafb",
+        padding: 12,
+      };
+    default:
+      return {};
+  }
+};
+
+// Helper function to get default props for element types
+const getDefaultPropsForType = (type: ElementType): Record<string, unknown> => {
+  switch (type) {
+    case "button":
+      return {
+        text: "Button",
+        onClick: "handleClick()",
+      };
+    case "text":
+      return {
+        text: "Text Element",
+      };
+    case "input":
+      return {
+        placeholder: "Enter text...",
+        type: "text",
+      };
+    case "image":
+      return {
+        src: "/placeholder.jpg",
+        alt: "Image",
+      };
+    case "container":
+      return {
+        children: [],
+      };
+    case "card":
+      return {
+        title: "Card Title",
+        children: [],
+      };
+    default:
+      return {};
+  }
+};
+
+// Element renderer component
+const ElementRenderer = ({ 
+  element, 
+  isSelected, 
+  onMouseDown,
+  onResizeHandleMouseDown 
+}: {
+  element: DesignElement;
+  isSelected: boolean;
+  onMouseDown: (e: React.MouseEvent, element: DesignElement) => void;
+  onResizeHandleMouseDown: (e: React.MouseEvent, elementId: string, direction: string) => void;
+}) => {
+  // Common style for all elements
+  const baseStyle: React.CSSProperties = {
+    position: 'absolute',
+    left: `${element.position.x}px`,
+    top: `${element.position.y}px`,
+    width: `${element.size.width}px`,
+    height: `${element.size.height}px`,
+    cursor: 'move',
+    border: isSelected ? '2px solid #3b82f6' : '1px solid transparent',
+    userSelect: 'none',
+    overflow: 'hidden',
+    ...(element.visible === false ? { opacity: 0.5 } : {}),
+  };
+
+  // Convert element style to React style object
+  const elementStyle: React.CSSProperties = {
+    backgroundColor: element.style.backgroundColor as string,
+    color: element.style.color as string,
+    fontFamily: element.style.fontFamily as string,
+    fontSize: `${element.style.fontSize}px`,
+    fontWeight: element.style.fontWeight as string,
+    textAlign: element.style.textAlign as React.CSSProperties['textAlign'],
+    padding: `${element.style.padding}px`,
+    margin: `${element.style.margin}px`,
+    borderRadius: `${element.style.borderRadius}px`,
+    borderWidth: `${element.style.borderWidth}px`,
+    borderColor: element.style.borderColor as string,
+    boxShadow: element.style.boxShadow as string,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: element.style.flexDirection as React.CSSProperties['flexDirection'],
+  };
+
+  // Render based on element type
+  const renderElementContent = () => {
+    switch (element.type) {
+      case "text":
+        return (
+          <div style={{
+            ...elementStyle,
+            display: 'block',
+            textAlign: element.style.textAlign as React.CSSProperties['textAlign'],
+            overflow: 'hidden',
+            width: '100%',
+            height: '100%',
+          }}>
+            {element.props.text as string}
+          </div>
+        );
+      case "button":
+        return (
+          <div style={{
+            ...elementStyle,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            height: '100%',
+          }}>
+            {element.props.text as string}
+          </div>
+        );
+      case "input":
+        return (
+          <div style={{
+            ...elementStyle,
+            backgroundColor: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            width: '100%',
+            height: '100%',
+          }}>
+            <span style={{ color: '#9ca3af' }}>
+              {element.props.placeholder as string}
+            </span>
+          </div>
+        );
+      case "image":
+        return (
+          <div style={{
+            ...elementStyle,
+            backgroundColor: '#f3f4f6',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            height: '100%',
+          }}>
+            <div>Image: {element.props.alt as string}</div>
+          </div>
+        );
+      case "container":
+      case "card":
+      case "vstack":
+      case "hstack":
+      case "zstack":
+      case "grid":
+      case "columns":
+        return (
+          <div style={{
+            ...elementStyle,
+            display: 'flex',
+            width: '100%',
+            height: '100%',
+            flexDirection: element.type === "hstack" ? "row" : "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}>
+            {element.type === "card" && (
+              <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
+                {element.props.title as string}
+              </div>
+            )}
+            <div style={{ fontSize: '12px', opacity: 0.7 }}>
+              {element.type.charAt(0).toUpperCase() + element.type.slice(1)}
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div style={{
+            ...elementStyle,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            height: '100%',
+          }}>
+            {element.type}
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div
+      style={baseStyle}
+      onMouseDown={(e) => onMouseDown(e, element)}
+    >
+      {renderElementContent()}
+      
+      {/* Only show resize handles when selected */}
+      {isSelected && (
+        <>
+          <div
+            className="absolute w-2 h-2 bg-primary border border-white rounded-full -top-1 -left-1 cursor-nw-resize"
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              onResizeHandleMouseDown(e, element.id, "nw");
+            }}
+          />
+          <div
+            className="absolute w-2 h-2 bg-primary border border-white rounded-full -top-1 -right-1 cursor-ne-resize"
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              onResizeHandleMouseDown(e, element.id, "ne");
+            }}
+          />
+          <div
+            className="absolute w-2 h-2 bg-primary border border-white rounded-full -bottom-1 -left-1 cursor-sw-resize"
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              onResizeHandleMouseDown(e, element.id, "sw");
+            }}
+          />
+          <div
+            className="absolute w-2 h-2 bg-primary border border-white rounded-full -bottom-1 -right-1 cursor-se-resize"
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              onResizeHandleMouseDown(e, element.id, "se");
+            }}
+          />
+        </>
+      )}
+    </div>
+  );
 };
 
 export function Canvas({
@@ -122,6 +339,7 @@ export function Canvas({
   showGrid,
   onSelectElement,
   onAddElement,
+  onUpdateElement,
   onMoveElement,
   onResizeElement
 }: CanvasProps) {
@@ -165,57 +383,72 @@ export function Canvas({
     setResizeDirection(direction);
   };
   
-  // Handle mouse move for dragging and resizing
+  // Handle mouse move for dragging/resizing
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging && !isResizing) return;
+    if (!canvasRef.current) return;
     
-    const canvasRect = canvasRef.current?.getBoundingClientRect();
-    if (!canvasRect) return;
+    const canvasRect = canvasRef.current.getBoundingClientRect();
+    const zoomFactor = zoom / 100;
     
     if (isDragging && selectedElementId) {
-      const x = (e.clientX - canvasRect.left - dragOffset.x) / (zoom / 100);
-      const y = (e.clientY - canvasRect.top - dragOffset.y) / (zoom / 100);
+      const mouseX = (e.clientX - canvasRect.left) / zoomFactor;
+      const mouseY = (e.clientY - canvasRect.top) / zoomFactor;
       
-      onMoveElement(selectedElementId, x, y);
+      // Calculate new position using the drag offset
+      const newX = mouseX - dragOffset.x / zoomFactor;
+      const newY = mouseY - dragOffset.y / zoomFactor;
+      
+      // Move the element
+      onMoveElement(selectedElementId, newX, newY);
     } else if (isResizing && selectedElementId && resizeDirection) {
-      const element = elements.find(el => el.id === selectedElementId);
-      if (!element) return;
+      const selectedElement = elements.find(el => el.id === selectedElementId);
+      if (!selectedElement) return;
       
-      const width = element.width ?? element.size?.width ?? 0;
-      const height = element.height ?? element.size?.height ?? 0;
-      const x = element.x ?? element.position.x ?? 0;
-      const y = element.y ?? element.position.y ?? 0;
+      const mouseX = (e.clientX - canvasRect.left) / zoomFactor;
+      const mouseY = (e.clientY - canvasRect.top) / zoomFactor;
       
-      let newWidth = width;
-      let newHeight = height;
-      let newX = x;
-      let newY = y;
+      const originalPosition = {
+        x: selectedElement.position.x,
+        y: selectedElement.position.y
+      };
       
-      // Handle zoom level in the calculations
-      const zoomScale = zoom / 100;
+      const originalSize = {
+        width: selectedElement.size.width,
+        height: selectedElement.size.height
+      };
       
+      let newWidth = originalSize.width;
+      let newHeight = originalSize.height;
+      let newX = originalPosition.x;
+      let newY = originalPosition.y;
+      
+      // Resize based on direction
       if (resizeDirection.includes('e')) {
-        newWidth = Math.max(20, (e.clientX - canvasRect.left) / zoomScale - x);
+        newWidth = Math.max(20, mouseX - originalPosition.x);
       }
       if (resizeDirection.includes('s')) {
-        newHeight = Math.max(20, (e.clientY - canvasRect.top) / zoomScale - y);
+        newHeight = Math.max(20, mouseY - originalPosition.y);
       }
       if (resizeDirection.includes('w')) {
-        const rawNewX = (e.clientX - canvasRect.left) / zoomScale;
-        newWidth = Math.max(20, x + width - rawNewX);
-        newX = rawNewX;
+        const deltaX = originalPosition.x - mouseX;
+        newWidth = Math.max(20, originalSize.width + deltaX);
+        newX = originalPosition.x - deltaX;
       }
       if (resizeDirection.includes('n')) {
-        const rawNewY = (e.clientY - canvasRect.top) / zoomScale;
-        newHeight = Math.max(20, y + height - rawNewY);
-        newY = rawNewY;
+        const deltaY = originalPosition.y - mouseY;
+        newHeight = Math.max(20, originalSize.height + deltaY);
+        newY = originalPosition.y - deltaY;
       }
       
-      if (newX !== x || newY !== y) {
+      // Update position if it changed
+      if (newX !== originalPosition.x || newY !== originalPosition.y) {
         onMoveElement(selectedElementId, newX, newY);
       }
       
-      onResizeElement(selectedElementId, newWidth, newHeight);
+      // Update size if it changed
+      if (newWidth !== originalSize.width || newHeight !== originalSize.height) {
+        onResizeElement(selectedElementId, newWidth, newHeight);
+      }
     }
   };
   
@@ -246,11 +479,12 @@ export function Canvas({
     const newElement: DesignElement = {
       id: uuidv4(),
       type,
-      name: `${type.charAt(0).toUpperCase() + type.slice(1)}`,
+      name: `${type.charAt(0).toUpperCase() + type.slice(1)}-${Math.floor(Math.random() * 1000)}`,
       props: getDefaultPropsForType(type),
       style: getDefaultStyleForType(type),
       position: { x, y },
       size: { width, height },
+      visible: true,
       // Legacy properties for backward compatibility
       x,
       y,
@@ -280,6 +514,22 @@ export function Canvas({
       document.removeEventListener('mouseup', handleGlobalMouseUp);
     };
   }, []);
+
+  // Update elements with legacy properties for backward compatibility
+  useEffect(() => {
+    elements.forEach(element => {
+      // Ensure legacy properties match the new structure
+      if (element.position.x !== element.x || element.position.y !== element.y ||
+          element.size.width !== element.width || element.size.height !== element.height) {
+        onUpdateElement(element.id, {
+          x: element.position.x,
+          y: element.position.y,
+          width: element.size.width,
+          height: element.size.height
+        });
+      }
+    });
+  }, [elements, onUpdateElement]);
   
   return (
     <div className="flex-1 overflow-auto relative">
@@ -304,156 +554,22 @@ export function Canvas({
           onDragOver={handleDragOver}
           onDrop={handleDrop}
         >
+          {/* Render all elements */}
+          {elements.map((element) => (
+            <ElementRenderer
+              key={element.id}
+              element={element}
+              isSelected={element.id === selectedElementId}
+              onMouseDown={handleElementMouseDown}
+              onResizeHandleMouseDown={handleResizeHandleMouseDown}
+            />
+          ))}
+          
           {/* Canvas indicator when dragging */}
           <div 
             className="absolute inset-0 border-2 border-dashed border-primary/40 pointer-events-none opacity-0 transition-opacity duration-200"
             style={{ 
               opacity: isDragging ? 0.5 : 0 
-            }}
-          />
-          
-          {elements.map(element => {
-            const isSelected = element.id === selectedElementId;
-            const x = element.x ?? element.position.x ?? 0;
-            const y = element.y ?? element.position.y ?? 0;
-            const width = element.width ?? element.size?.width ?? 100;
-            const height = element.height ?? element.size?.height ?? 100;
-            
-            return (
-              <div
-                key={element.id}
-                className={`absolute ${isSelected ? 'ring-2 ring-primary shadow-md' : 'hover:ring-1 hover:ring-primary/50'} transition-shadow`}
-                style={{
-                  left: `${x}px`,
-                  top: `${y}px`,
-                  width: `${width}px`,
-                  height: `${height}px`,
-                  backgroundColor: element.style?.backgroundColor as string,
-                  color: element.style?.color as string,
-                  fontFamily: element.style?.fontFamily as string,
-                  fontSize: `${element.style?.fontSize}px`,
-                  fontWeight: element.style?.fontWeight as string,
-                  textAlign: element.style?.textAlign as React.CSSProperties['textAlign'],
-                  padding: element.style?.padding ? `${element.style.padding}px` : undefined,
-                  borderRadius: element.style?.borderRadius ? `${element.style.borderRadius}px` : undefined,
-                  borderWidth: element.style?.borderWidth ? `${element.style.borderWidth}px` : undefined,
-                  borderStyle: element.style?.borderStyle as string,
-                  borderColor: element.style?.borderColor as string,
-                  display: element.visible === false ? 'none' : 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'move',
-                  userSelect: 'none',
-                  zIndex: element.style?.zIndex as number || 0,
-                  opacity: element.style?.opacity as number || 1,
-                  boxShadow: isSelected ? '0 0 0 1px rgba(59, 130, 246, 0.5), 0 2px 5px rgba(0, 0, 0, 0.1)' : undefined,
-                  transition: 'box-shadow 0.15s ease'
-                }}
-                onMouseDown={(e) => handleElementMouseDown(e, element)}
-              >
-                {/* Small label showing element type when selected */}
-                {isSelected && (
-                  <div className="absolute -top-6 left-0 bg-primary text-white text-xs px-1.5 py-0.5 rounded">
-                    {element.type}
-                  </div>
-                )}
-                
-                {/* Element content based on type */}
-                {element.type === 'text' && <div className="w-full h-full flex items-center px-1">{String(element.props.text || '')}</div>}
-                {element.type === 'button' && <button 
-                  className="w-full h-full flex items-center justify-center rounded"
-                  style={{ cursor: 'move' }} // Prevent actual button behavior during editing
-                  onMouseDown={(e) => e.stopPropagation()}
-                >
-                  {String(element.props.text || '')}
-                </button>}
-                {element.type === 'input' && <input 
-                  type="text" 
-                  placeholder={element.props.placeholder as string} 
-                  className="w-full h-full border px-2 rounded" 
-                  disabled 
-                  style={{ cursor: 'move' }}
-                />}
-                {element.type === 'image' && <div className="w-full h-full flex items-center justify-center bg-neutral-200/50 dark:bg-neutral-800/50 rounded overflow-hidden">
-                  {element.props.src ? (
-                    <img 
-                      src={element.props.src as string} 
-                      alt={element.props.alt as string || 'Element'} 
-                      className="max-w-full max-h-full object-contain" 
-                    />
-                  ) : (
-                    <div className="text-neutral-500 dark:text-neutral-400 text-sm">Image</div>
-                  )}
-                </div>}
-                {element.type === 'container' && (
-                  <div className="w-full h-full flex items-center justify-center text-neutral-500 dark:text-neutral-400 text-sm">
-                    Container
-                  </div>
-                )}
-                {element.type === 'vstack' && (
-                  <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-2">
-                    <div className="bg-neutral-200 dark:bg-neutral-700 w-full h-1/4 rounded"></div>
-                    <div className="bg-neutral-200 dark:bg-neutral-700 w-full h-1/4 rounded"></div>
-                    <div className="bg-neutral-200 dark:bg-neutral-700 w-full h-1/4 rounded"></div>
-                  </div>
-                )}
-                {element.type === 'hstack' && (
-                  <div className="w-full h-full flex flex-row items-center justify-center gap-2 p-2">
-                    <div className="bg-neutral-200 dark:bg-neutral-700 w-1/4 h-full rounded"></div>
-                    <div className="bg-neutral-200 dark:bg-neutral-700 w-1/4 h-full rounded"></div>
-                    <div className="bg-neutral-200 dark:bg-neutral-700 w-1/4 h-full rounded"></div>
-                  </div>
-                )}
-                
-                {/* Resize handles for selected elements */}
-                {isSelected && (
-                  <>
-                    <div
-                      className="absolute top-0 left-0 w-3 h-3 bg-primary rounded-full -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize border border-white"
-                      onMouseDown={(e) => handleResizeHandleMouseDown(e, element.id, 'nw')}
-                    />
-                    <div
-                      className="absolute top-0 right-0 w-3 h-3 bg-primary rounded-full translate-x-1/2 -translate-y-1/2 cursor-nesw-resize border border-white"
-                      onMouseDown={(e) => handleResizeHandleMouseDown(e, element.id, 'ne')}
-                    />
-                    <div
-                      className="absolute bottom-0 left-0 w-3 h-3 bg-primary rounded-full -translate-x-1/2 translate-y-1/2 cursor-nesw-resize border border-white"
-                      onMouseDown={(e) => handleResizeHandleMouseDown(e, element.id, 'sw')}
-                    />
-                    <div
-                      className="absolute bottom-0 right-0 w-3 h-3 bg-primary rounded-full translate-x-1/2 translate-y-1/2 cursor-nwse-resize border border-white"
-                      onMouseDown={(e) => handleResizeHandleMouseDown(e, element.id, 'se')}
-                    />
-                    <div
-                      className="absolute top-0 left-1/2 w-3 h-3 bg-primary rounded-full -translate-x-1/2 -translate-y-1/2 cursor-ns-resize border border-white"
-                      onMouseDown={(e) => handleResizeHandleMouseDown(e, element.id, 'n')}
-                    />
-                    <div
-                      className="absolute bottom-0 left-1/2 w-3 h-3 bg-primary rounded-full -translate-x-1/2 translate-y-1/2 cursor-ns-resize border border-white"
-                      onMouseDown={(e) => handleResizeHandleMouseDown(e, element.id, 's')}
-                    />
-                    <div
-                      className="absolute top-1/2 left-0 w-3 h-3 bg-primary rounded-full -translate-x-1/2 -translate-y-1/2 cursor-ew-resize border border-white"
-                      onMouseDown={(e) => handleResizeHandleMouseDown(e, element.id, 'w')}
-                    />
-                    <div
-                      className="absolute top-1/2 right-0 w-3 h-3 bg-primary rounded-full translate-x-1/2 -translate-y-1/2 cursor-ew-resize border border-white"
-                      onMouseDown={(e) => handleResizeHandleMouseDown(e, element.id, 'e')}
-                    />
-                  </>
-                )}
-              </div>
-            );
-          })}
-          
-          {/* Drop target indicator */}
-          <div
-            className="fixed hidden w-16 h-16 border-2 border-dashed border-primary pointer-events-none"
-            id="drop-indicator"
-            style={{
-              transform: 'translate(-50%, -50%)',
-              zIndex: 9999,
-              display: 'none'
             }}
           />
         </div>

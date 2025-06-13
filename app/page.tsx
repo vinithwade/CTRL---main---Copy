@@ -1,197 +1,189 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="px-4 lg:px-6 h-14 flex items-center">
-        <Link className="flex items-center justify-center" href="/">
-          <span className="text-2xl font-bold">CTRL</span>
-        </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
-            Features
-          </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
-            Pricing
-          </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
-            About
-          </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="/signin">
-            Sign In
-          </Link>
-        </nav>
-      </header>
-      <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
-          <div className="container px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-[1fr_500px] lg:gap-12 xl:grid-cols-[1fr_600px]">
-              <div className="flex flex-col justify-center space-y-4">
-                <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-                    Bi-directional No-Code/Low-Code Development
-                  </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Design, build logic, and generate code in one seamless platform. Real-time sync between 
-                    visual design, node-based logic, and editable code.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Link href="/signup">
-                    <Button size="lg" className="w-full">Get Started</Button>
-                  </Link>
-                  <Link href="/signin">
-                    <Button size="lg" variant="outline" className="w-full">Sign In</Button>
-                  </Link>
-                </div>
-              </div>
-              <div className="flex items-center justify-center">
-                <div className="relative h-[450px] w-full overflow-hidden rounded-xl bg-muted">
-                  {/* Replace with actual preview image or animation of the app */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-indigo-700 opacity-50" />
-                  <div className="absolute inset-0 flex items-center justify-center text-white">
-                    <div className="space-y-4 text-center">
-                      <h2 className="text-2xl font-bold">Platform Preview</h2>
-                      <p className="text-lg">Design. Logic. Code.</p>
-                      <div className="flex justify-center gap-4">
-                        <div className="h-16 w-16 rounded-full bg-white bg-opacity-20 flex items-center justify-center">UI</div>
-                        <div className="h-16 w-16 rounded-full bg-white bg-opacity-20 flex items-center justify-center">Logic</div>
-                        <div className="h-16 w-16 rounded-full bg-white bg-opacity-20 flex items-center justify-center">Code</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* Navigation */}
+      <nav className="fixed w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50 border-b">
+        <div className="container flex h-14 items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-6 w-6"
+            >
+              <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
+            </svg>
+            <span className="font-bold">CTRL</span>
           </div>
-        </section>
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
-                  Key Features
-                </h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl">
-                  Everything you need to build powerful applications without writing a single line of code.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 w-full max-w-5xl">
-                <div className="flex flex-col items-center space-y-2 border rounded-lg p-6 bg-card">
-                  <div className="p-2 bg-primary/10 rounded-full">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-6 w-6 text-primary"
-                    >
-                      <rect width="18" height="18" x="3" y="3" rx="2" />
-                      <path d="M3 9h18" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold">Figma-like Design</h3>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Drag and drop UI components with auto-layout, constraints and responsive design.
-                  </p>
-                </div>
-                <div className="flex flex-col items-center space-y-2 border rounded-lg p-6 bg-card">
-                  <div className="p-2 bg-primary/10 rounded-full">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-6 w-6 text-primary"
-                    >
-                      <path d="M14 4c0-1.1.9-2 2-2" />
-                      <path d="M20 2c1.1 0 2 .9 2 2" />
-                      <path d="M22 8c0 1.1-.9 2-2 2" />
-                      <path d="M16 10c-1.1 0-2-.9-2-2" />
-                      <path d="M4 18c-1.1 0-2-.9-2-2" />
-                      <path d="M2 12c0-1.1.9-2 2-2" />
-                      <path d="M8 10c1.1 0 2 .9 2 2" />
-                      <path d="M10 16c0 1.1-.9 2-2 2" />
-                      <line x1="2" x2="22" y1="12" y2="12" />
-                      <line x1="12" x2="12" y1="2" y2="22" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold">Node-based Logic</h3>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Create complex application logic using a visual flow-based editor.
-                  </p>
-                </div>
-                <div className="flex flex-col items-center space-y-2 border rounded-lg p-6 bg-card">
-                  <div className="p-2 bg-primary/10 rounded-full">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-6 w-6 text-primary"
-                    >
-                      <polyline points="16 18 22 12 16 6" />
-                      <polyline points="8 6 2 12 8 18" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold">Code Generation</h3>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Export to multiple platforms and languages with production-ready code.
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div className="flex items-center space-x-4">
+            <Link href="/login">
+              <Button variant="ghost">Log in</Button>
+            </Link>
+            <Link href="/signup">
+              <Button>Sign up</Button>
+            </Link>
           </div>
-        </section>
-        <section className="w-full py-12 md:py-24 lg:py-32">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
-                  Ready to start building?
-                </h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl">
-                  Join thousands of developers and designers using CTRL to accelerate their workflow.
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <Link href="/signup">
-                  <Button size="lg" className="w-full">Get Started for Free</Button>
-                </Link>
-                <Link href="#">
-                  <Button size="lg" variant="outline" className="w-full">Book a Demo</Button>
-                </Link>
-              </div>
-            </div>
         </div>
-        </section>
-      </main>
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-muted-foreground">© 2025 CTRL Platform. All rights reserved.</p>
-        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Terms of Service
+      </nav>
+
+      {/* Hero Section */}
+      <section className="pt-24 md:pt-32 container">
+        <div className="flex flex-col items-center text-center space-y-8">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tighter">
+            Design, Build, and Deploy
+            <span className="text-primary"> Faster</span>
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-[600px]">
+            CTRL is your all-in-one platform for designing, building, and deploying applications.
+            From concept to production in record time.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link href="/signup">
+              <Button size="lg" className="w-full sm:w-auto">
+                Get Started
+              </Button>
+            </Link>
+            <Link href="/docs">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                Documentation
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 container">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="flex flex-col items-center text-center space-y-4 p-6 border rounded-lg">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-primary h-6 w-6"
+              >
+                <path d="M12 3a6 6 0 0 0-6 6c0 7 6 11 6 11s6-4 6-11a6 6 0 0 0-6-6" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold">Design Mode</h3>
+            <p className="text-muted-foreground">
+              Create beautiful interfaces with our intuitive drag-and-drop design tools.
+            </p>
+          </div>
+          <div className="flex flex-col items-center text-center space-y-4 p-6 border rounded-lg">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-primary h-6 w-6"
+              >
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold">Logic Mode</h3>
+            <p className="text-muted-foreground">
+              Build complex application logic with our visual flow editor.
+            </p>
+          </div>
+          <div className="flex flex-col items-center text-center space-y-4 p-6 border rounded-lg">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-primary h-6 w-6"
+              >
+                <path d="m18 16 4-4-4-4" />
+                <path d="m6 8-4 4 4 4" />
+                <path d="m14.5 4-5 16" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold">Code Mode</h3>
+            <p className="text-muted-foreground">
+              Generate clean, production-ready code automatically from your designs.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-muted">
+        <div className="container flex flex-col items-center text-center space-y-8">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tighter">
+            Ready to Transform Your Development Workflow?
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-[600px]">
+            Join thousands of developers who are building better applications faster with CTRL.
+          </p>
+          <Link href="/signup">
+            <Button size="lg">Start Building for Free</Button>
           </Link>
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Privacy
-          </Link>
-        </nav>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t py-8 mt-auto">
+        <div className="container flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center space-x-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-6 w-6"
+            >
+              <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
+            </svg>
+            <span className="font-bold">CTRL</span>
+          </div>
+          <div className="flex items-center space-x-6 text-sm text-muted-foreground">
+            <Link href="/about" className="hover:text-foreground">
+              About
+            </Link>
+            <Link href="/blog" className="hover:text-foreground">
+              Blog
+            </Link>
+            <Link href="/docs" className="hover:text-foreground">
+              Documentation
+            </Link>
+            <Link href="/privacy" className="hover:text-foreground">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-foreground">
+              Terms
+            </Link>
+          </div>
+        </div>
       </footer>
     </div>
   );

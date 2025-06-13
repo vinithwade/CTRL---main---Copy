@@ -79,7 +79,7 @@
     "electron-serve": "^1.1.0",
     "electron-store": "^8.1.0",
     "electron-updater": "^6.6.2",
-    "firebase": "^11.6.1",
+    "firebase": "^11.9.1",
     "idb": "^8.0.2",
     "konva": "^9.3.20",
     "lucide-react": "^0.503.0",

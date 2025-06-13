@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useEditorStore, LogicNode, LogicEdge } from "@/lib/store/editor-store";
 import ReactFlow, {
   Background,
@@ -14,7 +14,9 @@ import ReactFlow, {
   Connection,
   Handle,
   Position,
-  ConnectionLineType,
+  Node,
+  NodeChange,
+  EdgeChange,
   NodeProps,
   EdgeProps,
 } from "reactflow";
@@ -43,7 +45,6 @@ import {
   Mail,
   ListIcon,
   MessageSquare,
-  Save
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
@@ -469,306 +470,179 @@ function FlowContainer() {
   const { 
     logicNodes, 
     logicEdges, 
-    selectedNodeId, 
-    setSelectedNode,
-    addLogicNode,
-    removeLogicNode,
-    addLogicEdge,
-    removeLogicEdge,
+    designElements,
+    addLogicNode, 
+    updateLogicNode, 
+    removeLogicNode, 
+    moveLogicNode, 
+    addLogicEdge, 
+    updateLogicEdge, 
+    removeLogicEdge, 
+    setSelectedNode 
   } = useEditorStore();
-
-  const [edges, setEdges] = useState<LogicEdge[]>([]);
-  const [nodes, setNodes] = useState<LogicNode[]>([]);
-  const [nodeType, setNodeType] = useState<string>('state');
-  const [isAddingNode, setIsAddingNode] = useState<boolean>(false);
-  const [showTemplates, setShowTemplates] = useState<boolean>(false);
-  const [showNodeEditor, setShowNodeEditor] = useState<boolean>(false);
-  const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const { screenToFlowPosition } = useReactFlow();
   
-  // Map store nodes to ReactFlow nodes
+  const reactFlowInstance = useReactFlow();
+  const [selectedNodeType, setSelectedNodeType] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [nodeName, setNodeName] = useState('');
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  
+  // Synchronize design elements with logic nodes
   useEffect(() => {
-    setNodes(
-      logicNodes.map((node) => ({
-        ...node,
-        type: node.type || 'state',
-        data: node.data || { label: 'Node' },
-      }))
-    );
-  }, [logicNodes]);
-  
-  // Map store edges to ReactFlow edges
-  useEffect(() => {
-    setEdges(
-      logicEdges.map((edge) => ({
-        ...edge,
-        type: 'default',
-        animated: true,
-      }))
-    );
-  }, [logicEdges]);
-  
-  // On connection handler
-  const onConnect = useCallback(
-    (connection: Connection) => {
-      const newEdge: LogicEdge = {
-        id: `e-${uuidv4()}`,
-        source: connection.source || '',
-        target: connection.target || '',
-        type: 'default',
-        sourceHandle: connection.sourceHandle,
-        targetHandle: connection.targetHandle,
-        data: {}
-      };
+    // Look for design elements that don't have corresponding logic nodes
+    designElements.forEach(element => {
+      const existingNode = logicNodes.find(node => 
+        node.data.sourceElementId === element.id
+      );
       
-      addLogicEdge(newEdge);
-    },
-    [addLogicEdge]
-  );
-  
-  // On node selection handler
-  const onNodeClick = useCallback(
-    (_: React.MouseEvent, node: LogicNode) => {
-      setSelectedNode(node.id);
-      setShowNodeEditor(true);
-    },
-    [setSelectedNode]
-  );
-  
-  // On edge selection handler
-  const onEdgeClick = useCallback(
-    (_: React.MouseEvent, edge: LogicEdge) => {
-      // Handle edge selection
-    },
-    []
-  );
-  
-  // On pane click handler - deselect
-  const onPaneClick = useCallback(() => {
-    setSelectedNode(null);
-    setShowNodeEditor(false);
-  }, [setSelectedNode]);
-  
-  // Add node at position
-  const addNodeToFlow = useCallback(
-    (type: string, position: { x: number; y: number }) => {
-      const nodeConfig = nodeTypes[type as keyof typeof nodeTypes] ? NODE_TYPES[type] : NODE_TYPES.state;
-      
-      const id = `node-${uuidv4()}`;
-      const newNode: LogicNode = {
-        id,
-        type: nodeConfig.type,
-        position,
-        data: { ...nodeConfig.defaultData, label: `${nodeConfig.label} ${nodes.length + 1}` },
-      };
-      
-      addLogicNode(newNode);
-      setSelectedNode(id);
-      setShowNodeEditor(true);
-      setIsAddingNode(false);
-    },
-    [addLogicNode, setSelectedNode, nodes.length]
-  );
-  
-  // Apply a predefined template flow
-  const applyTemplate = useCallback((templateName: string) => {
-    // Clear existing nodes and edges
-    nodes.forEach(node => removeLogicNode(node.id));
-    edges.forEach(edge => removeLogicEdge(edge.id));
-    
-    let templateNodes: LogicNode[] = [];
-    let templateEdges: LogicEdge[] = [];
-    
-    // Create different templates based on name
-    switch (templateName) {
-      case 'api-fetch':
-        // Template for API data fetching flow
-        templateNodes = [
-          {
-            id: 'node-1',
-            type: 'event',
-            position: { x: 250, y: 50 },
-            data: { label: 'Component Mount', eventType: 'mount' }
+      if (!existingNode) {
+        // Create a logic node for this design element
+        const nodeType = getNodeTypeForElement(element.type);
+        const newNode: LogicNode = {
+          id: `node-${element.id}`,
+          type: nodeType,
+          position: { 
+            x: element.position.x + 300, // Offset to avoid overlap 
+            y: element.position.y 
           },
-          {
-            id: 'node-2',
-            type: 'state',
-            position: { x: 250, y: 150 },
-            data: { label: 'Loading State', fields: { value: 'true' } }
-          },
-          {
-            id: 'node-3',
-            type: 'api',
-            position: { x: 250, y: 250 },
-            data: { label: 'Fetch Data', method: 'GET', endpoint: '/api/data' }
-          },
-          {
-            id: 'node-4',
-            type: 'condition',
-            position: { x: 250, y: 350 },
-            data: { label: 'API Success?', condition: 'response.ok === true' }
-          },
-          {
-            id: 'node-5',
-            type: 'state',
-            position: { x: 100, y: 450 },
-            data: { label: 'Error State', fields: { message: 'Failed to fetch data' } }
-          },
-          {
-            id: 'node-6',
-            type: 'state',
-            position: { x: 400, y: 450 },
-            data: { label: 'Data State', fields: { items: '[]' } }
-          },
-          {
-            id: 'node-7',
-            type: 'state',
-            position: { x: 250, y: 550 },
-            data: { label: 'Loading Complete', fields: { value: 'false' } }
+          data: {
+            label: element.name,
+            sourceElementId: element.id,
+            elementType: element.type,
+            // Properties specific to node type
+            ...(nodeType === 'state' && { 
+              fields: { 
+                visible: element.visible !== undefined ? element.visible : true,
+                position: `x: ${element.position?.x || 0}, y: ${element.position?.y || 0}`,
+                size: `width: ${element.size?.width || 100}, height: ${element.size?.height || 100}`
+              } 
+            }),
+            ...(nodeType === 'event' && { 
+              eventType: 'onClick',
+              target: element.id
+            }),
           }
-        ];
+        };
         
-        templateEdges = [
-          { id: 'edge-1', source: 'node-1', target: 'node-2', type: 'default' },
-          { id: 'edge-2', source: 'node-2', target: 'node-3', type: 'default' },
-          { id: 'edge-3', source: 'node-3', target: 'node-4', type: 'default' },
-          { id: 'edge-4', source: 'node-4', target: 'node-5', type: 'default', sourceHandle: 'false' },
-          { id: 'edge-5', source: 'node-4', target: 'node-6', type: 'default', sourceHandle: 'true' },
-          { id: 'edge-6', source: 'node-5', target: 'node-7', type: 'default' },
-          { id: 'edge-7', source: 'node-6', target: 'node-7', type: 'default' }
-        ];
-        break;
-        
-      case 'form-submit':
-        // Template for form submission flow
-        templateNodes = [
-          {
-            id: 'node-1',
-            type: 'event',
-            position: { x: 250, y: 50 },
-            data: { label: 'Form Submit', eventType: 'submit' }
-          },
-          {
-            id: 'node-2',
-            type: 'state',
-            position: { x: 250, y: 150 },
-            data: { label: 'Form Data', fields: { name: '', email: '' } }
-          },
-          {
-            id: 'node-3',
-            type: 'function',
-            position: { x: 250, y: 250 },
-            data: { label: 'Validate Form', code: 'return name.length > 0 && email.includes("@")' }
-          },
-          {
-            id: 'node-4',
-            type: 'condition',
-            position: { x: 250, y: 350 },
-            data: { label: 'Is Valid?', condition: 'result === true' }
-          },
-          {
-            id: 'node-5',
-            type: 'state',
-            position: { x: 100, y: 450 },
-            data: { label: 'Error State', fields: { message: 'Please fill all fields correctly' } }
-          },
-          {
-            id: 'node-6',
-            type: 'api',
-            position: { x: 400, y: 450 },
-            data: { label: 'Submit Form', method: 'POST', endpoint: '/api/form' }
-          }
-        ];
-        
-        templateEdges = [
-          { id: 'edge-1', source: 'node-1', target: 'node-2', type: 'default' },
-          { id: 'edge-2', source: 'node-2', target: 'node-3', type: 'default' },
-          { id: 'edge-3', source: 'node-3', target: 'node-4', type: 'default' },
-          { id: 'edge-4', source: 'node-4', target: 'node-5', type: 'default', sourceHandle: 'false' },
-          { id: 'edge-5', source: 'node-4', target: 'node-6', type: 'default', sourceHandle: 'true' }
-        ];
-        break;
-        
-      case 'auth-flow':
-        // Template for authentication flow
-        templateNodes = [
-          {
-            id: 'node-1',
-            type: 'event',
-            position: { x: 250, y: 50 },
-            data: { label: 'Login Button Click', eventType: 'click' }
-          },
-          {
-            id: 'node-2',
-            type: 'api',
-            position: { x: 250, y: 150 },
-            data: { label: 'Login API', method: 'POST', endpoint: '/api/auth/login' }
-          },
-          {
-            id: 'node-3',
-            type: 'condition',
-            position: { x: 250, y: 250 },
-            data: { label: 'Login Success?', condition: 'response.token !== undefined' }
-          },
-          {
-            id: 'node-4',
-            type: 'state',
-            position: { x: 100, y: 350 },
-            data: { label: 'Error State', fields: { message: 'Invalid login credentials' } }
-          },
-          {
-            id: 'node-5',
-            type: 'state',
-            position: { x: 400, y: 350 },
-            data: { label: 'Auth State', fields: { token: 'response.token', user: 'response.user' } }
-          },
-          {
-            id: 'node-6',
-            type: 'function',
-            position: { x: 400, y: 450 },
-            data: { label: 'Navigate', code: 'navigate("/dashboard")' }
-          }
-        ];
-        
-        templateEdges = [
-          { id: 'edge-1', source: 'node-1', target: 'node-2', type: 'default' },
-          { id: 'edge-2', source: 'node-2', target: 'node-3', type: 'default' },
-          { id: 'edge-3', source: 'node-3', target: 'node-4', type: 'default', sourceHandle: 'false' },
-          { id: 'edge-4', source: 'node-3', target: 'node-5', type: 'default', sourceHandle: 'true' },
-          { id: 'edge-5', source: 'node-5', target: 'node-6', type: 'default' }
-        ];
-        break;
-    }
+        addLogicNode(newNode);
+      }
+    });
     
-    // Add template nodes and edges to the flow
-    templateNodes.forEach(node => addLogicNode(node));
-    templateEdges.forEach(edge => addLogicEdge(edge));
-    
-    setShowTemplates(false);
-  }, [addLogicNode, addLogicEdge, removeLogicNode, removeLogicEdge, nodes, edges]);
-  
-  // Handle pane right click
-  const onPaneContextMenu = useCallback(
-    (event: React.MouseEvent) => {
-      event.preventDefault();
-      
-      if (reactFlowWrapper.current) {
-        const rect = reactFlowWrapper.current.getBoundingClientRect();
-        const position = screenToFlowPosition({
-          x: event.clientX - rect.left,
-          y: event.clientY - rect.top,
-        });
-        
-        if (isAddingNode) {
-          addNodeToFlow(nodeType, position);
+    // Clean up logic nodes that reference deleted design elements
+    logicNodes.forEach(node => {
+      if (node.data.sourceElementId) {
+        const designElement = designElements.find(el => el.id === node.data.sourceElementId);
+        if (!designElement) {
+          removeLogicNode(node.id);
         }
       }
-    },
-    [isAddingNode, addNodeToFlow, nodeType, screenToFlowPosition]
-  );
+    });
+  }, [designElements, logicNodes]);
+
+  // Define node types
+  const nodeTypes = useMemo<NodeTypes>(() => ({
+    state: StateNode,
+    api: ApiNode,
+    condition: ConditionNode,
+    function: FunctionNode,
+    input: InputNode,
+    output: OutputNode,
+    event: EventNode
+  }), []);
   
-  // Setup default zoom on load
-  const defaultViewport = { x: 0, y: 0, zoom: 0.8 };
+  // Define edge types
+  const edgeTypes = useMemo<EdgeTypes>(() => ({
+    default: CustomEdge,
+  }), []);
+  
+  // Convert store nodes to react-flow nodes with proper typing
+  const nodes = useMemo(() => 
+    logicNodes.map((node) => ({
+      id: node.id,
+      type: node.type,
+      position: node.position,
+      data: node.data,
+      selected: node.id === selectedNodeId
+    }))
+  , [logicNodes, selectedNodeId]);
+  
+  // Convert store edges to react-flow edges
+  const edges = useMemo(() => 
+    logicEdges.map((edge) => ({
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      type: edge.type || 'default',
+      sourceHandle: edge.sourceHandle,
+      targetHandle: edge.targetHandle,
+      data: edge.data,
+      selected: false
+    }))
+  , [logicEdges]);
+  
+  // Handle node click
+  const handleNodeClick = (event: React.MouseEvent, node: Node) => {
+    setSelectedNodeId(node.id);
+    setSelectedNode(node.id);
+  };
+  
+  // Handle pane click (deselect)
+  const handlePaneClick = () => {
+    setSelectedNodeId(null);
+    setSelectedNode(null);
+  };
+  
+  // Handle node dragging
+  const handleNodeDragStop = (_: React.MouseEvent, node: Node) => {
+    moveLogicNode(node.id, node.position.x, node.position.y);
+  };
+  
+  // Handle connecting nodes
+  const handleConnect = (connection: Connection) => {
+    if (!connection.source || !connection.target) return;
+    
+    addLogicEdge({
+      id: `edge-${uuidv4()}`,
+      source: connection.source,
+      target: connection.target,
+      sourceHandle: connection.sourceHandle,
+      targetHandle: connection.targetHandle,
+    });
+  };
+  
+  // Handle node changes (position)
+  const handleNodesChange = (changes: NodeChange[]) => {
+    // Already handled by other callbacks
+  };
+  
+  // Handle edge changes (selection, removal)
+  const handleEdgesChange = (changes: EdgeChange[]) => {
+    changes.forEach(change => {
+      if (change.type === 'remove') {
+        removeLogicEdge(change.id);
+      }
+    });
+  };
+  
+  // Helper function to determine the appropriate node type for a design element
+  const getNodeTypeForElement = (elementType: string): string => {
+    switch (elementType) {
+      case 'button':
+        return 'event';
+      case 'input':
+        return 'input';
+      case 'text':
+        return 'output';
+      case 'container':
+      case 'card':
+      case 'vstack':
+      case 'hstack':
+      case 'grid':
+        return 'state';
+      default:
+        return 'state';
+    }
+  };
 
   return (
     <div className="h-full flex overflow-hidden">
@@ -782,11 +656,10 @@ function FlowContainer() {
           {Object.entries(NODE_TYPES).map(([key, config]) => (
             <Button
               key={key}
-              variant={nodeType === key ? "default" : "outline"}
+              variant={selectedNodeType === key ? "default" : "outline"}
               className="w-full justify-start text-sm"
               onClick={() => {
-                setNodeType(key);
-                setIsAddingNode(true);
+                setSelectedNodeType(key);
               }}
             >
               {config.icon && React.createElement(config.icon, {
@@ -801,14 +674,14 @@ function FlowContainer() {
             <Button 
               variant="outline" 
               className="w-full text-sm mb-2"
-              onClick={() => setShowTemplates(true)}
+              onClick={() => setDialogOpen(true)}
             >
               Load Template
             </Button>
           </div>
         </div>
         
-        {selectedNodeId && showNodeEditor && (
+        {selectedNodeId && dialogOpen && (
           <div className="border-t">
             <div className="p-3">
               <h3 className="text-sm font-medium mb-2">Node Properties</h3>
@@ -819,23 +692,18 @@ function FlowContainer() {
       </div>
       
       {/* Main content: Flow canvas */}
-      <div className="flex-1 h-full" ref={reactFlowWrapper}>
+      <div className="flex-1 h-full">
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          onNodesChange={() => {}}
-          onEdgesChange={() => {}}
-          onConnect={onConnect}
-          onNodeClick={onNodeClick}
-          onEdgeClick={onEdgeClick}
-          onPaneClick={onPaneClick}
-          onPaneContextMenu={onPaneContextMenu}
+          onNodesChange={handleNodesChange}
+          onEdgesChange={handleEdgesChange}
+          onConnect={handleConnect}
+          onNodeClick={handleNodeClick}
+          onPaneClick={handlePaneClick}
+          onNodeDragStop={handleNodeDragStop}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
-          defaultViewport={defaultViewport}
-          connectionLineType={ConnectionLineType.Bezier}
-          fitView
-          attributionPosition="bottom-right"
           className="bg-background"
         >
           <Controls className="bg-background border rounded-md shadow-md" />
@@ -847,7 +715,7 @@ function FlowContainer() {
           <Background gap={16} color="#99999922" />
           
           {/* Template dialog */}
-          <Dialog open={showTemplates} onOpenChange={setShowTemplates}>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Choose a Template</DialogTitle>
@@ -860,7 +728,7 @@ function FlowContainer() {
                 <Button 
                   variant="outline" 
                   className="justify-start h-auto p-4 text-left"
-                  onClick={() => applyTemplate('api-fetch')}
+                  onClick={() => applyTemplate('api-fetch', setDialogOpen)}
                 >
                   <div>
                     <h3 className="font-medium">API Data Fetch</h3>
@@ -871,7 +739,7 @@ function FlowContainer() {
                 <Button 
                   variant="outline" 
                   className="justify-start h-auto p-4 text-left"
-                  onClick={() => applyTemplate('form-submit')}
+                  onClick={() => applyTemplate('form-submit', setDialogOpen)}
                 >
                   <div>
                     <h3 className="font-medium">Form Submission</h3>
@@ -882,7 +750,7 @@ function FlowContainer() {
                 <Button 
                   variant="outline" 
                   className="justify-start h-auto p-4 text-left"
-                  onClick={() => applyTemplate('auth-flow')}
+                  onClick={() => applyTemplate('auth-flow', setDialogOpen)}
                 >
                   <div>
                     <h3 className="font-medium">Authentication Flow</h3>
@@ -892,7 +760,7 @@ function FlowContainer() {
               </div>
               
               <DialogFooter>
-                <Button variant="outline" onClick={() => setShowTemplates(false)}>
+                <Button variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancel
                 </Button>
               </DialogFooter>
@@ -901,7 +769,7 @@ function FlowContainer() {
           
           {/* Instructional overlay when no nodes exist */}
           {nodes.length === 0 && (
-            <Panel position="center" className="bg-background/95 p-8 rounded-lg shadow-lg border text-center max-w-md">
+            <Panel position="top-center" className="bg-background/95 p-8 rounded-lg shadow-lg border text-center max-w-md">
               <h3 className="text-xl font-medium mb-2">Logic Editor</h3>
               <p className="text-muted-foreground mb-4">
                 Create visual logic flows for your application by adding nodes and connecting them.
@@ -933,8 +801,7 @@ function FlowContainer() {
                   variant="outline" 
                   className="justify-start"
                   onClick={() => {
-                    setNodeType('state');
-                    setIsAddingNode(true);
+                    setSelectedNodeType('state');
                   }}
                 >
                   <Database className="mr-2 h-4 w-4" />
@@ -944,8 +811,7 @@ function FlowContainer() {
                   variant="outline" 
                   className="justify-start"
                   onClick={() => {
-                    setNodeType('event');
-                    setIsAddingNode(true);
+                    setSelectedNodeType('event');
                   }}
                 >
                   <Timer className="mr-2 h-4 w-4" />
@@ -954,7 +820,7 @@ function FlowContainer() {
                 <Button 
                   variant="outline" 
                   className="justify-start col-span-2"
-                  onClick={() => setShowTemplates(true)}
+                  onClick={() => setDialogOpen(true)}
                 >
                   <FileInput className="mr-2 h-4 w-4" />
                   Load a Template
@@ -963,26 +829,6 @@ function FlowContainer() {
               <p className="mt-4 text-sm text-muted-foreground">
                 Pro tip: Right-click on the canvas to add the selected node type
               </p>
-            </Panel>
-          )}
-
-          {/* Adding node hint */}
-          {isAddingNode && (
-            <Panel position="bottom-center" className="bg-background rounded-full shadow-lg border py-2 px-4 mb-2">
-              <div className="flex items-center text-sm">
-                <div className="mr-2 px-2 py-0.5 bg-primary/10 rounded text-primary text-xs font-medium">
-                  Adding {nodeType} node
-                </div>
-                Right-click on the canvas to place the node
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="ml-2 h-6 px-2" 
-                  onClick={() => setIsAddingNode(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
             </Panel>
           )}
         </ReactFlow>
@@ -1172,28 +1018,17 @@ function NodePropertiesEditor({ nodeId }: { nodeId: string }) {
   );
 }
 
+// Define the applyTemplate function
+function applyTemplate(templateName: string, setDialogOpen: (open: boolean) => void) {
+  // Implementation for template application would go here
+  console.log(`Applying template: ${templateName}`);
+  setDialogOpen(false);
+}
+
 export default function LogicMode() {
   return (
-    <div className="h-full flex flex-col">
-      <div className="border-b px-4 py-2 flex justify-between items-center">
-        <h2 className="text-lg font-medium">Logic Editor</h2>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm">
-            <Timer className="h-4 w-4 mr-2" />
-            Auto Layout
-          </Button>
-          <Button variant="outline" size="sm">
-            <Save className="h-4 w-4 mr-2" />
-            Save
-          </Button>
-        </div>
-      </div>
-      
-      <div className="flex-1 h-full">
-        <ReactFlowProvider>
-          <FlowContainer />
-        </ReactFlowProvider>
-      </div>
-    </div>
+    <ReactFlowProvider>
+      <FlowContainer />
+    </ReactFlowProvider>
   );
 } 

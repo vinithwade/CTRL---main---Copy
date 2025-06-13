@@ -151,13 +151,23 @@ export const useEditorStore = create<EditorState>()(
       moveDesignElement: (id, x, y) => 
         set((state) => ({
           designElements: state.designElements.map((el) => 
-            el.id === id ? { ...el, x, y } : el
+            el.id === id ? { 
+              ...el, 
+              x, 
+              y,
+              position: { x, y } 
+            } : el
           )
         })),
       resizeDesignElement: (id, width, height) => 
         set((state) => ({
           designElements: state.designElements.map((el) => 
-            el.id === id ? { ...el, width, height } : el
+            el.id === id ? { 
+              ...el, 
+              width, 
+              height,
+              size: { width, height } 
+            } : el
           )
         })),
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useEditorStore, CodeFile, DesignElement } from "@/lib/store/editor-store";
+import { ElementStyle } from "@/lib/types/editor-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -64,6 +65,17 @@ const getLanguageFromExtension = (filename: string): string => {
 
 // Function to generate code based on design elements
 const generateComponentCode = (element: DesignElement, language: string): string => {
+  // Ensure we have size and style objects with defaults
+  const size = element.size || { width: 100, height: 100 };
+  const style = (element.style || {}) as Partial<ElementStyle>;
+  const position = element.position || { x: 0, y: 0 };
+
+  // Define default style properties
+  const flexDirection = style.flexDirection || "column";
+  const justifyContent = style.justifyContent || "flex-start";
+  const alignItems = style.alignItems || "flex-start";
+  const gap = style.gap || 8;
+
   if (language === "typescript" || language === "javascript") {
     // React component
     if (element.type === "container") {
@@ -73,11 +85,18 @@ export const ${element.name.replace(/\s+/g, '')} = () => {
   return (
     <div 
       style={{ 
-        width: ${element.width}px,
-        height: ${element.height}px,
-        backgroundColor: '${element.props.backgroundColor || "transparent"}',
-        padding: ${element.props.padding || 0}px,
-        borderRadius: ${element.props.borderRadius || 0}px,
+        width: ${size.width}px,
+        height: ${size.height}px,
+        position: 'relative',
+        backgroundColor: '${style.backgroundColor || "transparent"}',
+        padding: ${style.padding || 0}px,
+        margin: ${style.margin || 0}px,
+        borderRadius: ${style.borderRadius || 0}px,
+        display: 'flex',
+        flexDirection: '${flexDirection}',
+        justifyContent: '${justifyContent}',
+        alignItems: '${alignItems}',
+        ${style.boxShadow ? `boxShadow: '${style.boxShadow}',` : ''}
       }}
     >
       {/* Add child components here */}
@@ -98,14 +117,21 @@ export const ${element.name.replace(/\s+/g, '')} = () => {
     <button 
       onClick={handleClick}
       style={{ 
-        width: ${element.width}px,
-        height: ${element.height}px,
-        backgroundColor: '${element.props.backgroundColor || "#3b82f6"}',
-        color: '${element.props.color || "#ffffff"}',
-        borderRadius: ${element.props.borderRadius || 4}px,
-        padding: ${element.props.padding || 8}px,
+        width: ${size.width}px,
+        height: ${size.height}px,
+        backgroundColor: '${style.backgroundColor || "#3b82f6"}',
+        color: '${style.color || "#ffffff"}',
+        borderRadius: ${style.borderRadius || 4}px,
+        padding: ${style.padding || 8}px,
+        margin: ${style.margin || 0}px,
         border: 'none',
         cursor: 'pointer',
+        fontWeight: '${style.fontWeight || "normal"}',
+        fontSize: ${style.fontSize || 16}px,
+        textAlign: '${style.textAlign || "center"}',
+        position: 'relative',
+        left: ${position.x}px,
+        top: ${position.y}px,
       }}
     >
       ${element.props.text || "Button"}
@@ -120,16 +146,112 @@ export const ${element.name.replace(/\s+/g, '')} = () => {
   return (
     <p
       style={{ 
-        width: ${element.width}px,
-        color: '${element.props.color || "#000000"}',
-        fontFamily: '${element.style?.fontFamily || "inherit"}',
-        fontSize: ${element.style?.fontSize || 16}px,
-        fontWeight: '${element.style?.fontWeight || "normal"}',
-        textAlign: '${element.style?.textAlign || "left"}',
+        width: ${size.width}px,
+        height: ${size.height}px,
+        position: 'relative',
+        left: ${position.x}px,
+        top: ${position.y}px,
+        color: '${style.color || "#000000"}',
+        fontFamily: '${style.fontFamily || "inherit"}',
+        fontSize: ${style.fontSize || 16}px,
+        fontWeight: '${style.fontWeight || "normal"}',
+        textAlign: '${style.textAlign || "left"}',
+        margin: ${style.margin || 0}px,
+        padding: ${style.padding || 0}px,
       }}
     >
       ${element.props.text || "Text content"}
     </p>
+  );
+};
+`;
+    } else if (element.type === "input") {
+      return `import React, { useState } from 'react';
+
+export const ${element.name.replace(/\s+/g, '')} = () => {
+  const [value, setValue] = useState('');
+
+  const handleChange = (e) => {
+    setValue(e.target.value);
+  };
+
+  return (
+    <input
+      type="${element.props.type || "text"}"
+      placeholder="${element.props.placeholder || "Enter text..."}"
+      value={value}
+      onChange={handleChange}
+      style={{ 
+        width: ${size.width}px,
+        height: ${size.height}px,
+        position: 'relative',
+        left: ${position.x}px,
+        top: ${position.y}px,
+        padding: ${style.padding || 8}px,
+        margin: ${style.margin || 0}px,
+        borderRadius: ${style.borderRadius || 4}px,
+        borderWidth: ${style.borderWidth || 1}px,
+        borderColor: '${style.borderColor || "#d1d5db"}',
+        borderStyle: 'solid',
+        fontSize: ${style.fontSize || 16}px,
+      }}
+    />
+  );
+};
+`;
+    } else if (element.type === "image") {
+      return `import React from 'react';
+
+export const ${element.name.replace(/\s+/g, '')} = () => {
+  return (
+    <img
+      src="${element.props.src || "/placeholder.jpg"}"
+      alt="${element.props.alt || "Image"}"
+      style={{ 
+        width: ${size.width}px,
+        height: ${size.height}px,
+        position: 'relative',
+        left: ${position.x}px,
+        top: ${position.y}px,
+        objectFit: 'cover',
+        borderRadius: ${style.borderRadius || 0}px,
+      }}
+    />
+  );
+};
+`;
+    } else if (element.type === "card") {
+      return `import React from 'react';
+
+export const ${element.name.replace(/\s+/g, '')} = () => {
+  return (
+    <div 
+      style={{ 
+        width: ${size.width}px,
+        height: ${size.height}px,
+        position: 'relative',
+        left: ${position.x}px,
+        top: ${position.y}px,
+        backgroundColor: '${style.backgroundColor || "#ffffff"}',
+        padding: ${style.padding || 16}px,
+        margin: ${style.margin || 0}px,
+        borderRadius: ${style.borderRadius || 8}px,
+        boxShadow: '${style.boxShadow || "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"}',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <h3 style={{ 
+        margin: '0 0 12px 0', 
+        fontSize: '18px', 
+        fontWeight: 'bold' 
+      }}>
+        ${element.props.title || "Card Title"}
+      </h3>
+      <div>
+        {/* Card content goes here */}
+      </div>
+    </div>
   );
 };
 `;
@@ -141,13 +263,14 @@ export const ${element.name.replace(/\s+/g, '')} = () => {
 
 struct ${element.name.replace(/\s+/g, '')}: View {
     var body: some View {
-        VStack {
+        VStack(alignment: .leading, spacing: ${gap}) {
             // Add child components here
         }
-        .frame(width: ${element.width}, height: ${element.height})
-        .background(Color(hex: "${element.props.backgroundColor || "#ffffff"}"))
-        .cornerRadius(${element.props.borderRadius || 0})
-        .padding(${element.props.padding || 0})
+        .frame(width: ${size.width}, height: ${size.height})
+        .background(Color(hex: "${style.backgroundColor || "#ffffff"}"))
+        .cornerRadius(${style.borderRadius || 0})
+        .padding(${style.padding || 0})
+        .position(x: ${position.x}, y: ${position.y})
     }
 }
 
@@ -188,11 +311,14 @@ struct ${element.name.replace(/\s+/g, '')}: View {
             // Add your action here
         }) {
             Text("${element.props.text || "Button"}")
-                .foregroundColor(Color(hex: "${element.props.color || "#ffffff"}"))
-                .frame(width: ${element.width}, height: ${element.height})
+                .foregroundColor(Color(hex: "${style.color || "#ffffff"}"))
+                .frame(width: ${size.width}, height: ${size.height})
+                .font(.system(size: ${style.fontSize || 16}, weight: .${style.fontWeight || "medium"}))
         }
-        .background(Color(hex: "${element.props.backgroundColor || "#3b82f6"}"))
-        .cornerRadius(${element.props.borderRadius || 4})
+        .background(Color(hex: "${style.backgroundColor || "#3b82f6"}"))
+        .cornerRadius(${style.borderRadius || 4})
+        .padding(${style.padding || 0})
+        .position(x: ${position.x}, y: ${position.y})
     }
 }
 
@@ -223,44 +349,45 @@ extension Color {
     }
 }
 `;
+    } else if (element.type === "text") {
+      return `import SwiftUI
+
+struct ${element.name.replace(/\s+/g, '')}: View {
+    var body: some View {
+        Text("${element.props.text || "Text content"}")
+            .foregroundColor(Color(hex: "${style.color || "#000000"}"))
+            .font(.system(size: ${style.fontSize || 16}, weight: .${style.fontWeight || "regular"}))
+            .frame(width: ${size.width}, height: ${size.height}, alignment: .${style.textAlign || "leading"})
+            .position(x: ${position.x}, y: ${position.y})
     }
-  } else if (language === "python") {
-    // Python (e.g., for backend or data processing)
-    if (element.type === "container") {
-      return `class ${element.name.replace(/\s+/g, '')}:
-    def __init__(self):
-        self.width = ${element.width}
-        self.height = ${element.height}
-        self.background_color = "${element.props.backgroundColor || "transparent"}"
-        self.padding = ${element.props.padding || 0}
-        self.border_radius = ${element.props.borderRadius || 0}
-        self.children = []
-    
-    def add_child(self, child):
-        self.children.append(child)
-        
-    def render(self):
-        print(f"Rendering {self.__class__.__name__}")
-        for child in self.children:
-            child.render()
-`;
-    } else if (element.type === "button") {
-      return `class ${element.name.replace(/\s+/g, '')}:
-    def __init__(self):
-        self.text = "${element.props.text || "Button"}"
-        self.width = ${element.width}
-        self.height = ${element.height}
-        self.background_color = "${element.props.backgroundColor || "#3b82f6"}"
-        self.color = "${element.props.color || "#ffffff"}"
-        self.border_radius = ${element.props.borderRadius || 4}
-        self.padding = ${element.props.padding || 8}
-    
-    def on_click(self):
-        print("Button clicked")
-        # Add your click handler logic here
-        
-    def render(self):
-        print(f"Rendering button: {self.text}")
+}
+
+// Helper for hex color support
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3:
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6:
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8:
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (1, 1, 1, 0)
+        }
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue:  Double(b) / 255,
+            opacity: Double(a) / 255
+        )
+    }
+}
 `;
     }
   }

@@ -1,8 +1,25 @@
 "use client";
 
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, Auth, User, Unsubscribe } from 'firebase/auth';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  User,
+  Auth,
+  Unsubscribe
+} from 'firebase/auth';
+import { 
+  getFirestore, 
+  doc, 
+  setDoc, 
+  getDoc,
+  Firestore
+} from 'firebase/firestore';
+import { getAnalytics, isSupported } from 'firebase/analytics';
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -27,9 +44,27 @@ const isFirebaseConfigValid = Object.values(firebaseConfig).every(
 );
 
 // Initialize Firebase safely
-let app;
+let app: ReturnType<typeof initializeApp>;
 let auth: Auth;
 let db: Firestore;
+
+// Configure Google OAuth provider
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '320497289582-tmckmv6ls86q9esq9d80uodg9442n4eh.apps.googleusercontent.com',
+  prompt: 'select_account'
+});
+
+// User interface
+interface UserData {
+  uid: string;
+  email: string;
+  displayName?: string;
+  photoURL?: string;
+  providerId?: string;
+  createdAt: Date;
+  lastLogin: Date;
+}
 
 // Create mock Firebase implementations for development
 const createMockAuth = () => {
@@ -200,8 +235,8 @@ const createMockFirestore = () => {
 };
 
 // Use mock implementations by default in development or when config is invalid
-if (!isFirebaseConfigValid || process.env.NODE_ENV === 'development') {
-  console.log('Using mock Firebase implementation for development');
+if (!isFirebaseConfigValid) {
+  console.log('Using mock Firebase implementation due to invalid config');
   auth = createMockAuth() as Auth;
   db = createMockFirestore() as Firestore;
 } else {
@@ -209,6 +244,15 @@ if (!isFirebaseConfigValid || process.env.NODE_ENV === 'development') {
     app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
     auth = getAuth(app);
     db = getFirestore(app);
+    
+    // Initialize Analytics only in browser environment and if supported
+    if (typeof window !== 'undefined') {
+      isSupported().then(supported => {
+        if (supported) {
+          getAnalytics(app);
+        }
+      });
+    }
   } catch (error) {
     console.error('Firebase initialization error:', error);
     console.log('Using mock Firebase implementation instead');
@@ -219,4 +263,67 @@ if (!isFirebaseConfigValid || process.env.NODE_ENV === 'development') {
   }
 }
 
-export { app, auth, db, isFirebaseConfigValid }; 
+// Create or update user in database
+const createOrUpdateUser = async (user: User) => {
+  if (!user.email) throw new Error('User email is required');
+
+  const userRef = doc(db, 'users', user.uid);
+  const userSnap = await getDoc(userRef);
+
+  const userData: UserData = {
+    uid: user.uid,
+    email: user.email,
+    displayName: user.displayName || undefined,
+    photoURL: user.photoURL || undefined,
+    providerId: user.providerData[0]?.providerId,
+    createdAt: userSnap.exists() ? (userSnap.data().createdAt as Date) : new Date(),
+    lastLogin: new Date()
+  };
+
+  await setDoc(userRef, userData, { merge: true });
+  return userData;
+};
+
+// Sign up with email and password
+const signUpWithEmail = async (email: string, password: string) => {
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const userData = await createOrUpdateUser(userCredential.user);
+  return { user: userCredential.user, userData };
+};
+
+// Sign in with email and password
+const signInWithEmail = async (email: string, password: string) => {
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  const userData = await createOrUpdateUser(userCredential.user);
+  return { user: userCredential.user, userData };
+};
+
+// Sign in with Google
+const signInWithGoogle = async () => {
+  const userCredential = await signInWithPopup(auth, googleProvider);
+  const userData = await createOrUpdateUser(userCredential.user);
+  return { user: userCredential.user, userData };
+};
+
+// Sign out
+const signOutUser = async () => {
+  await signOut(auth);
+};
+
+// Get current user
+const getCurrentUser = () => {
+  return auth.currentUser;
+};
+
+export {
+  app,
+  auth,
+  db,
+  signUpWithEmail,
+  signInWithEmail,
+  signInWithGoogle,
+  signOutUser,
+  getCurrentUser,
+  createOrUpdateUser,
+  isFirebaseConfigValid
+}; 
